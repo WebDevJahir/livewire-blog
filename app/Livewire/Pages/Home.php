@@ -3,20 +3,41 @@
 namespace App\Livewire\Pages;
 
 use Livewire\Component;
+use Illuminate\Support\Facades\Log;
 
 class Home extends Component
 {
-    public $message = 'Hello from Livewire!';
+    public $email = '';
+    public $message = '';
+    public $activeTab = 'latest';
 
-    public function mount()
+    public function setTab($tab)
     {
-        // This will run when the component is mounted
-        \Log::info('Home component mounted');
+        $this->activeTab = $tab;
+    }
+
+    public function subscribe()
+    {
+        $this->validate([
+            'email' => 'required|email'
+        ]);
+
+        Log::info('New newsletter subscription: ' . $this->email);
+
+        $this->email = '';
+        $this->message = 'Thanks for subscribing! Please check your email to confirm.';
     }
 
     public function render()
     {
-        return view('livewire.pages.home')
-            ->layout('components.layouts.app');
+        $posts = match($this->activeTab) {
+            'popular' => 'Popular posts...',
+            'trending' => 'Trending posts...',
+            default => 'Latest posts...'
+        };
+
+        return view('livewire.pages.home', [
+            'posts' => $posts
+        ]);
     }
 }
